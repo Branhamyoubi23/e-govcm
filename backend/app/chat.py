@@ -32,16 +32,16 @@ async def process_chat(message: str, history: list[ChatMessage]) -> dict:
     log = logger.bind(message_len=len(message))
     log.info("chat_request_received")
 
-    if not settings.deepseek_api_key:
+    if not settings.gemini_api_key:
         return {
-            "message": "Cle API DeepSeek non configuree. Veuillez definir DEEPSEEK_API_KEY.",
+            "message": "Cle API Gemini non configuree. Veuillez definir GEMINI_API_KEY.",
             "tool_calls": [],
         }
 
-    # DeepSeek uses OpenAI-compatible API
+    # Gemini uses OpenAI-compatible API
     client = OpenAI(
-        api_key=settings.deepseek_api_key,
-        base_url="https://api.deepseek.com",
+        api_key=settings.gemini_api_key,
+        base_url="https://generativelanguage.googleapis.com/v1beta/openai/",
     )
 
     # Build tool definitions from MCP tool list (OpenAI format)
@@ -69,13 +69,13 @@ async def process_chat(message: str, history: list[ChatMessage]) -> dict:
 
     for _ in range(max_iterations):
         response = client.chat.completions.create(
-            model="deepseek-chat",
+            model="gemini-2.5-flash",
             messages=messages,
             tools=tools,
             tool_choice="auto",
             max_tokens=4096,
         )
-        log.info("deepseek_response", finish_reason=response.choices[0].finish_reason)
+        log.info("gemini_response", finish_reason=response.choices[0].finish_reason)
 
         choice = response.choices[0]
 
